@@ -1,0 +1,177 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+/// <summary>
+///工具类要求的功能：
+/// 1）给定数组按某一属性升序排序：OrderBy
+/// 2）给定数组按某一属性降序排序：OrderByDecending
+/// 3）给定数组按某一属性找该属性最大值的数组成员：Max
+/// 4）给定数组按某一属性找该属性最小值的数组成员：Min
+/// </summary>
+class ArrayHelper
+{    
+    
+    /// <summary>
+    ///实现功能： 1）给定数组按某一属性升序排序：OrderBy
+    /// </summary>
+    /// <typeparam name="T">数据类型</typeparam>
+    /// <typeparam name="TKey"> 属性</typeparam>
+    /// <param name="array">包含某一数据类型的数组</param>
+    /// <param name="handler">使用委托返回需要被比较的属性</param>
+    static public void OrderBy<T,TKey>(T[] array, SelectHandler<T, TKey> handler)
+        where TKey : IComparable<TKey>
+    {
+        for (int i = 0; i < array.Length; i++)
+        {
+            for (int j = i + 1; j < array.Length; j++)
+            {
+                if(handler(array[i]).CompareTo( handler (array [j]))>0)
+               // if (array[i].CompareTo(array[j]) > 0)
+                {
+                    var temp = array[i];
+                    array[i] = array[j];
+                    array[j] = temp;
+                }
+            }
+
+        }
+    }
+    /// <summary>
+    /// 2）给定数组按某一属性降序排序；OrderByDecending
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TKey"></typeparam>
+    /// <param name="array"></param>
+    /// <param name="handler"></param>
+    static public void OrderByDecending<T, TKey>(T[] array, SelectHandler<T, TKey> handler)
+        where TKey : IComparable<TKey>
+    {
+        for (int i = 0; i < array.Length; i++)
+        {
+            for (int j = i + 1; j < array.Length; j++)
+            {
+                if (handler(array[i]).CompareTo(handler(array[j])) < 0)               
+                {
+                    var temp = array[i];
+                    array[i] = array[j];
+                    array[j] = temp;
+                }
+            }
+
+        }
+    }
+    /// <summary>
+    ///3）给定数组按某一属性找该属性最大值的数组成员:Max
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TKey"></typeparam>
+    /// <param name="array"></param>
+    /// <param name="handler"></param>
+    static public T Max<T, TKey>(T[] array, SelectHandler<T, TKey> handler)
+        where TKey : IComparable<TKey>
+    {
+        T max=default (T );
+        for (int i = 0; i < array.Length-1; i++)
+        {
+            if (handler(array[i]).CompareTo(handler(array[i + 1])) < 0)
+            {
+                max = array[i + 1];
+            }
+        }                 
+                    
+       return max;
+    }
+
+    /// <summary>
+    ///3）给定数组按某一属性找该属性最小值的数组成员:Mix
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TKey"></typeparam>
+    /// <param name="array"></param>
+    /// <param name="handler"></param>
+    static public T Min<T, TKey>(T[] array, SelectHandler<T, TKey> handler)
+        where TKey : IComparable<TKey>
+    {
+        T min = default(T);
+        for (int i = 0; i < array.Length - 1; i++)
+        {
+            if (handler(array[i]).CompareTo(handler(array[i + 1])) > 0)
+            {
+                min = array[i + 1];
+            }
+        }
+
+        return min;
+    }
+/// <summary>
+/// FindObject and FindObjectAll
+/// </summary>
+/// <param name=""></param>
+/// <returns></returns>
+/// 
+    public static T FindObject<T>(T[] array, FindHandler<T> findHandler)
+    {
+        for (int i = 0; i < array.Length; i++)
+        {
+            if (findHandler(array[i]) == true)
+            {
+                return array[i];
+            }            
+        }
+       
+        return default(T);
+    }
+
+    public static T[] FindObjectAll<T>(T[] array, FindHandler<T> findHandler)
+    {
+        List<T> list = new List<T>();
+        
+        for (int i = 0; i < array.Length; i++)
+        {
+            if (findHandler(array[i]) == true)
+            {
+                list.Add (array[i]);
+            }
+        }
+        return list.ToArray();//可变数组转固定数组
+    }
+/// <summary>
+/// 将数组的某一字段拿出来，组成新的数组:例如，取出所有人的年龄做一个年龄数组。
+/// </summary>
+/// <typeparam name="T"></typeparam>
+/// <typeparam name="TKey"></typeparam>
+/// <param name="array"></param>
+/// <param name="selectHandler"></param>
+/// <returns></returns>
+   
+    public static TKey[] FindSomePropertyToNewArray<T,TKey>(T[] array, SelectHandler<T,TKey> selectHandler)
+    {
+        TKey[] list = new TKey[array.Length ];
+        for(int i=0;i<array.Length;i++)
+        {
+            list[i] = selectHandler(array[i]);           
+        }
+        return list;
+
+    }
+}
+/// <summary>
+///  SelectHandler 委托表示获得属性
+/// </summary>
+/// <typeparam name="T">数组</typeparam>
+/// <typeparam name="TKey">数组中的属性</typeparam>
+/// <param name="t">属性值</param>
+/// <returns></returns>
+public delegate TKey SelectHandler<T, TKey>(T t);
+
+/// <summary>
+/// 用委托表示查找条件为？的过程；返回bool
+/// </summary>
+/// <typeparam name="T">代表数组</typeparam>
+/// <param name="t">代表数组中的成员</param>
+/// <returns></returns>
+public delegate bool FindHandler<T>(T t);
+
