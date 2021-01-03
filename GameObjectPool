@@ -1,0 +1,106 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using System.Collections;
+/// <summary>
+/// 游戏对象池
+/// </summary>
+public class GameObjectPool : MonoBehaviour
+{
+    //1 创建池：
+    // Start is called before the first frame update
+    private Dictionary<string, List<GameObject>> cache =
+        new Dictionary<string, List<GameObject>>();
+    //2.创建一个对象并使用对象：
+    // 池中有从池中返回，没有则加载，放入池中再返回。
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="key">要寻找的对象的名字</param>
+    /// <param name="go"> 表示要创建对象的预制件</param>
+    /// <param name="position">创建对象的位置</param>
+    /// <param name="quaternion">创建对象的角度</param>
+    /// <returns></returns>
+    public GameObject CreateObject(string key,GameObject go ,Vector3 position, Quaternion quaternion)
+    {
+        //1)查找池中有无可用游戏对象；
+        GameObject tempGo = FindUsable(key);
+        //2)池中有从池中返回；
+        if (tempGo != null)
+        {
+            tempGo.transform.position = position;
+            tempGo.transform.rotation = quaternion;
+            tempGo.SetActive(true);//表示当前这个游戏对象在使用中；
+        }
+        else  //3)池中没有则加载，放入池中再返回。
+        { //动态创建预制件的方法Instantiate
+            tempGo = Instantiate(go, position, quaternion) as GameObject;
+            //放入池中
+            Add(key, tempGo);
+        }
+        //作为池物体的子物体；以上创建完后，这个对象已经出现在Scene了，应该让它作为池物体的子物体出现在Hierarchy 
+        tempGo.transform.parent = this.transform;
+        return tempGo;
+    }
+    private GameObject FindUsable(string key) //从字典中获得可用的GameObject
+    {
+        if (cache.ContainsKey(key))
+        {
+            //在cache[key]列表中，找出未激活的游戏物体。!p.activeSelf 表示未激活的游戏物体。
+            return cache[key].Find(p => !p.activeSelf);  // Find内的委托 用lambda 表达式表示
+        }
+        else
+            return null;
+    }
+    private void Add(string key ,GameObject go) //给字典增加key值
+    {
+        //判断池中是否存在需要的Key, 如果不存在，则新创建Key及其列表
+        if(!cache .ContainsKey (key) )
+        {
+            cache.Add(key, new List<GameObject>());
+        }
+        cache[key].Add(go); //将游戏对象添加到池中。
+    }
+ //3.释放资源：从池中删除对象
+ //3.1 释放部分：按Key释放
+ public void Clear(string key) // public 类型，表示外部可以调用
+    {
+        //首先释放场景里面的所有对象实例
+        for (int i = 0; i < cache.Count; i++)
+        {
+            Destroy(cache[key][i]);
+        }
+        //删除对象的地址
+        cache.Remove(key);
+    }
+ //3.2 释放全部
+ public void ClearAll()
+    {
+        foreach (var key in cache.Keys)
+        {
+            Clear(key);
+        }
+        //List<string> keys = new List<string>(cache.Keys);
+        //for (int i = 0; i < keys.Count ; i++)
+        //{
+        //    Clear(keys[i]);
+        //}
+    }
+    //4 回收对象：使用完对象，返回池中（从画面中消失）
+    //4.1 即时回收对象
+    public  void CollectObject(GameObject go )
+    {
+        go.SetActive(false); //回收的本质是对象从画面中消失；
+    }
+    //4.2 延时回收对象：等待一段时间回收（用协程延时）
+    public void CollectObject(GameObject go,float delay)
+    {
+        StartCoroutine(CollectDelay(go,delay)); //回收的本质是对象从画面中消失；
+    }
+    private IEnumerator CollectDelay(GameObject go ,float delay )
+    {
+        yield return new WaitForSeconds(delay);
+        CollectObject(go);
+    }
+}
