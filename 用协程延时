@@ -1,0 +1,10 @@
+//延时回收对象：等待一段时间回收（用协程延时）
+    public void CollectObject(GameObject go,float delay)
+    {
+        StartCoroutine(CollectDelay(go,delay)); //回收的本质是对象从画面中消失；
+    }
+    private IEnumerator CollectDelay(GameObject go ,float delay ) //用枚举法产生延时delay时间的
+    {
+        yield return new WaitForSeconds(delay);
+        CollectObject(go);//延时delay时间后，调用CollectObject()方法，对GameObject的go实例进行回收
+    }
