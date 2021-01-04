@@ -1,0 +1,64 @@
+using System;
+/*
+ * 
+   单例设计模式(by Tedu)
+   定义：是设计模式中最简单的一个设计模式
+         单例设计模式本质上就是一个类，一个特殊的类
+         特殊1:构造方法私有
+             2：包含一个 静态私有字段 返回自己的类型
+             3：包含一个 静态公共方法 返回自己的类型
+   用途：保证自己在应用程序域中 最多仅有一个实例【对象】存
+ */
+namespace Test
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Chairman zhang =Chairman.GetChairman ();
+            Chairman li  = Chairman.GetChairman();
+       
+            if ( zhang.GetHashCode()== li.GetHashCode() ) // 判断Zhang  li的hashcode是否一致。
+            { Console.WriteLine("the HashCode is same"); }
+            else
+                Console.WriteLine("the HashCode is not same");
+        }
+    }
+
+    class Chairman // 饿汉模式
+    {
+        private  Chairman()
+        { }
+        private static Chairman obj = new Chairman();
+        public static Chairman GetChairman() // 这里定义了一个提供唯一对象的唯一通道。
+        {
+            return obj;
+        }
+    }
+
+    class President // 懒汉模式
+    {
+        private President()
+        { }
+        private static President obj;
+        public static President GetPresident() // 这里定义了一个提供唯一对象的唯一通道。
+        {
+            if (obj == null) obj = new President(); 
+            return obj;
+        }
+    }
+
+    class Monitor // 懒汉模式
+    {
+        private Monitor()
+        { }
+        private static Monitor obj;
+        public static Monitor GetMonitor // 单例模式用属性实现。这里定义了一个提供唯一对象的唯一通道。
+        {
+            get {
+                if (obj == null) obj = new Monitor();
+                return obj;
+            }         
+        }
+    }
+}
