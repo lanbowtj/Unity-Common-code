@@ -1,0 +1,22 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class TransformHelper : MonoBehaviour
+{
+    
+    /// <summary>
+    /// 转向
+    /// </summary>
+    /// <param name="target">转向目标</param>
+    /// <param name="transform"></param>
+    /// <param name="rotationSpeed">转向角度</param>
+   static public void LookAtTarget(Vector3 target,Transform transform, float rotationSpeed)
+    {
+        if (target != Vector3.zero) // 判断转向是否为0，非0才执行
+        {
+            Quaternion dir = Quaternion.LookRotation(target);
+            transform.rotation = Quaternion.Lerp(transform.rotation, dir, rotationSpeed);//lerp插值转向
+        }
+    }
+}
