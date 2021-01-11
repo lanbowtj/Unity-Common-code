@@ -1,0 +1,45 @@
+//    Quaternion.LookRotation
+
+//public static Quaternion LookRotation(Vector3 forward, Vector3 upwards = Vector3.up);
+//    Description:
+
+//Creates a rotation with the specified forward and upwards directions.
+
+//Returns the computed quaternion.If used to orient a Transform, the Z axis will be aligned with forward/and the Y axis with upwards if these vectors are orthogonal. Logs an error if the forward direction is zero.
+
+using UnityEngine;
+using System.Collections;
+/*
+* 
+*/
+public class ExampleClass : MonoBehaviour {
+     pullic Transform player;
+    public Transform target;
+    void Update() {
+          Vector3 relativePos = target.position - player.position;
+          //relativePos.y = 0;//player物体朝向target物体时默认y轴会有倾斜，如果不想倾斜，可设置y轴坐标为0
+          player.rotation = Quaternion.LookRotation(relativePos);
+    }
+}
+
+//**仅仅使用Quaternion中的LookRotation方法，可以使当前物体在一瞬间就朝向目标物体。假使要物体慢慢旋转朝向目标物体，就需要再加上插值运算：
+
+//Quaternion.Lerp或者Quaternion.Slerp
+
+//代码例子：
+using UnityEngine;
+using System.Collections;
+
+public class ExampleClass : MonoBehaviour {
+    pullic Transform player;
+    public Transform target;
+    public float speed = 5.0f;
+    
+    void Update() {
+        Vector3 relativePos = target.position - player.position;
+        Quaternion targetRotation = Quaternion.LookRotation(relativePos);
+        player.rotation = Quaternion.Lerp(player.rotation, targetRotation, Time.time * speed);//物体想慢慢朝向目标
+        
+        player.position = Quaternion.Lerp(player.position, target.position, Time.time * speed);//物体慢慢到达目标位置
+    }
+}
