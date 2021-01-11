@@ -1,0 +1,25 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class TestAll : MonoBehaviour
+{
+
+    public static Transform FindChild(Transform trans, string goName)
+    {
+        Transform child = trans.Find(goName);
+        if (child != null)
+            return child;
+
+        Transform go; //临时存储子物体的Transform
+        for (int i = 0; i < trans.childCount; i++)//遍历trans的所有子物体，总数量trans.childCount
+        {
+            child = trans.GetChild(i);
+            go = FindChild(child, goName);
+            if (go != null)
+                return go;//只要找到了就返回值，不再找了。
+        }
+        return null;
+
+    }
+}
